@@ -1,0 +1,50 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.chengxusheji.mapper.ScheduleMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加档期计划记录 -->
+	<insert id="addSchedule" parameterType="schedule">
+		insert into t_schedule(movieObj,hallObj,scheduleDate,scheduleTime) values 
+		(#{movieObj.movieId},#{hallObj.movieHallId},#{scheduleDate},#{scheduleTime})
+	</insert>
+
+	<!-- 按照查询条件分页查询档期计划记录 -->
+	<select id="querySchedule" resultMap="scheduleMap" >
+		select t_schedule.* from t_schedule,t_movie,t_movieHall ${where} and t_schedule.movieObj = t_movie.movieId and t_schedule.hallObj = t_movieHall.movieHallId limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="scheduleMap" type="schedule">
+        <id property="scheduleId" column="scheduleId" />
+        <association property="movieObj" column="movieObj" select="com.chengxusheji.mapper.MovieMapper.getMovie" />
+        <association property="hallObj" column="hallObj" select="com.chengxusheji.mapper.MovieHallMapper.getMovieHall" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有档期计划记录 -->
+	<select id="queryScheduleList" resultMap="scheduleMap" >
+		select t_schedule.* from t_schedule,t_movie,t_movieHall ${where} and t_schedule.movieObj = t_movie.movieId and t_schedule.hallObj = t_movieHall.movieHallId
+	</select>
+
+    <!-- 按照查询条件的档期计划记录数 -->
+	<select id="queryScheduleCount" resultType="int">
+		select count(*) from t_schedule,t_movie,t_movieHall ${where} and t_schedule.movieObj = t_movie.movieId and t_schedule.hallObj = t_movieHall.movieHallId
+	</select>
+
+	<!-- 根据主键查询某个档期计划记录 -->
+	<select id="getSchedule" parameterType="int" resultMap="scheduleMap">
+		select * from t_schedule where t_schedule.scheduleId = #{scheduleId}
+	</select>
+
+	<!-- 更新档期计划记录 -->
+	<update id="updateSchedule" parameterType="schedule">
+		update t_schedule set movieObj=#{movieObj.movieId},hallObj=#{hallObj.movieHallId},scheduleDate=#{scheduleDate},scheduleTime=#{scheduleTime} where scheduleId = #{scheduleId}
+	</update>
+
+	<!-- 删除档期计划记录 -->
+	<delete id="deleteSchedule" parameterType="int">
+		delete from t_schedule where scheduleId=#{scheduleId}
+	</delete>
+
+</mapper>

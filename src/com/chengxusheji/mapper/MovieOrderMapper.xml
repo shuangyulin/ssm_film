@@ -1,0 +1,50 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.chengxusheji.mapper.MovieOrderMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加订票记录 -->
+	<insert id="addMovieOrder" parameterType="movieOrder">
+		insert into t_movieOrder(scheduleObj,rowsIndex,cols,price,userObj,orderTime) values 
+		(#{scheduleObj.scheduleId},#{rowsIndex},#{cols},#{price},#{userObj.user_name},#{orderTime})
+	</insert>
+
+	<!-- 按照查询条件分页查询订票记录 -->
+	<select id="queryMovieOrder" resultMap="movieOrderMap" >
+		select t_movieOrder.* from t_movieOrder,t_schedule,t_userInfo ${where} and t_movieOrder.scheduleObj = t_schedule.scheduleId and t_movieOrder.userObj = t_userInfo.user_name limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="movieOrderMap" type="movieOrder">
+        <id property="orderId" column="orderId" />
+        <association property="scheduleObj" column="scheduleObj" select="com.chengxusheji.mapper.ScheduleMapper.getSchedule" />
+        <association property="userObj" column="userObj" select="com.chengxusheji.mapper.UserInfoMapper.getUserInfo" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有订票记录 -->
+	<select id="queryMovieOrderList" resultMap="movieOrderMap" >
+		select t_movieOrder.* from t_movieOrder,t_schedule,t_userInfo ${where} and t_movieOrder.scheduleObj = t_schedule.scheduleId and t_movieOrder.userObj = t_userInfo.user_name
+	</select>
+
+    <!-- 按照查询条件的订票记录数 -->
+	<select id="queryMovieOrderCount" resultType="int">
+		select count(*) from t_movieOrder,t_schedule,t_userInfo ${where} and t_movieOrder.scheduleObj = t_schedule.scheduleId and t_movieOrder.userObj = t_userInfo.user_name
+	</select>
+
+	<!-- 根据主键查询某个订票记录 -->
+	<select id="getMovieOrder" parameterType="int" resultMap="movieOrderMap">
+		select * from t_movieOrder where t_movieOrder.orderId = #{orderId}
+	</select>
+
+	<!-- 更新订票记录 -->
+	<update id="updateMovieOrder" parameterType="movieOrder">
+		update t_movieOrder set scheduleObj=#{scheduleObj.scheduleId},rowsIndex=#{rowsIndex},cols=#{cols},price=#{price},userObj=#{userObj.user_name},orderTime=#{orderTime} where orderId = #{orderId}
+	</update>
+
+	<!-- 删除订票记录 -->
+	<delete id="deleteMovieOrder" parameterType="int">
+		delete from t_movieOrder where orderId=#{orderId}
+	</delete>
+
+</mapper>
